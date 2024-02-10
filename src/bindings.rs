@@ -108,13 +108,11 @@ impl<'a> System for Eq2DConstraints<'a> {
                 idx_rx += 1;
             }
             Binding::FixedX(b) => {
-                let bind = b.bind(&[x[self.inv_lut[&b.v_id]], x[self.inv_lut[&b.v_id] + 1]]);
-                rx[idx_rx] = bind;
+                rx[idx_rx] = b.bind(&[x[self.inv_lut[&b.v_id]], x[self.inv_lut[&b.v_id] + 1]]);
                 idx_rx += 1;
             }
             Binding::FixedY(b) => {
-                let bind = b.bind(&[x[self.inv_lut[&b.v_id]], x[self.inv_lut[&b.v_id] + 1]]);
-                rx[idx_rx] = bind;
+                rx[idx_rx] = b.bind(&[x[self.inv_lut[&b.v_id]], x[self.inv_lut[&b.v_id] + 1]]);
                 idx_rx += 1;
             }
             Binding::Vertical(b) => {
@@ -145,6 +143,15 @@ impl<'a> System for Eq2DConstraints<'a> {
                     x[self.inv_lut[&b.l2va_id] + 1],
                     x[self.inv_lut[&b.l2vb_id]],
                     x[self.inv_lut[&b.l2vb_id] + 1],
+                ]);
+                idx_rx += 1;
+            }
+            Binding::Distance(b) => {
+                rx[idx_rx] = b.bind(&[
+                    x[self.inv_lut[&b.va_id]],
+                    x[self.inv_lut[&b.va_id] + 1],
+                    x[self.inv_lut[&b.vb_id]],
+                    x[self.inv_lut[&b.vb_id] + 1],
                 ]);
                 idx_rx += 1;
             }

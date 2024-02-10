@@ -14,6 +14,7 @@ pub enum Binding {
     Vertical(BindVertical),
     Horizontal(BindHorizontal),
     Parallel(BindParallel),
+    Distance(BindDistance),
     Error(BindError),
 }
 #[allow(dead_code)]
@@ -26,6 +27,7 @@ impl Binding {
             Binding::Vertical(b) => b.id,
             Binding::Horizontal(b) => b.id,
             Binding::Parallel(b) => b.id,
+            Binding::Distance(b) => b.id,
             Binding::Error(b) => b.id,
         }
     }
@@ -53,6 +55,10 @@ impl Binding {
                 v_ids.insert(b.l1vb_id);
                 v_ids.insert(b.l2va_id);
                 v_ids.insert(b.l2vb_id);
+            }
+            Binding::Distance(b) => {
+                v_ids.insert(b.va_id);
+                v_ids.insert(b.vb_id);
             }
             Binding::Error(_) => (),
         };
@@ -144,6 +150,19 @@ pub struct BindParallel {
 impl BindParallel {
     pub fn bind(&self, vals: &[f64; 8]) -> f64 {
         (vals[6] - vals[4]) * (vals[3] - vals[1]) - (vals[7] - vals[5]) * (vals[2] - vals[0])
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct BindDistance {
+    pub id: BindingId,
+    pub sq_distance_value: f64,
+    pub va_id: VertexId,
+    pub vb_id: VertexId,
+}
+impl BindDistance {
+    pub fn bind(&self, vals: &[f64; 4]) -> f64 {
+        ((vals[3] - vals[1]).powi(2) + ((vals[2] - vals[0]).powi(2)) - self.sq_distance_value).abs()
     }
 }
 
@@ -393,6 +412,9 @@ impl Vertex {
     //     self.selected = selected;
     //     self
     // }
+    pub fn dist_sq(&self, v: &Vertex) -> f64 {
+        (v.pt.y - self.pt.y).powi(2) + (v.pt.x - self.pt.x).powi(2)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -477,6 +499,17 @@ impl BindingsPool {
             l2vb_id: seg2.1.id,
         };
         self.insert(id, Binding::Parallel(bind.clone()));
+        bind
+    }
+    pub fn add_bind_distance(&mut self, seg: (&Vertex, &Vertex)) -> BindDistance {
+        let id = BindingId::new_id();
+        let bind = BindDistance {
+            id,
+            sq_distance_value: seg.0.dist_sq(seg.1),
+            va_id: seg.0.id,
+            vb_id: seg.1.id,
+        };
+        self.insert(id, Binding::Distance(bind.clone()));
         bind
     }
 }

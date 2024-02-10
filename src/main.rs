@@ -8,10 +8,10 @@ fn main() -> Result<(), String> {
     let mut bind_pool = BindingsPool::new();
     let mut v_pool = VerticesPool::new();
 
-    let va = v_pool.add(Point::new(-10., -30.));
-    let vb = v_pool.add(Point::new(4., 20.));
-    let vc = v_pool.add(Point::new(-10., 0.));
-    let vd = v_pool.add(Point::new(15., 5.));
+    let va = v_pool.add(Point::new(-27., 30.));
+    let vb = v_pool.add(Point::new(120., 20.));
+    let vc = v_pool.add(Point::new(-10., 60.));
+    let vd = v_pool.add(Point::new(0., 52.));
 
     println!("va: ({:.2},{:.2}) ", va.pt.x, va.pt.y);
     println!("vb: ({:.2},{:.2})", vb.pt.x, vb.pt.y);
@@ -20,6 +20,7 @@ fn main() -> Result<(), String> {
 
     println!("m1: {:.4} ", (vb.pt.y - va.pt.y) / (vb.pt.x - va.pt.x));
     println!("m2: {:.4} ", (vd.pt.y - vc.pt.y) / (vd.pt.x - vc.pt.x));
+    println!("dist(va,vd): {:.4} ", va.dist_sq(&vd));
 
     // 8 DOF and 8 Eq => Determined system
     // Undertermined system sometimes work (converge) sometimes no
@@ -28,7 +29,7 @@ fn main() -> Result<(), String> {
     _ = bind_pool.add_bind_fixed(&va); // 2 eq
     _ = bind_pool.add_bind_fixed(&vc); // 2 eq
     _ = bind_pool.add_bind_fixed_y(&vb); // 1 eq
-    _ = bind_pool.add_bind_fixed_y(&vd); // 1 eq
+    _ = bind_pool.add_bind_distance((&va, &vd)); // 1 eq
 
     let mut cst = Eq2DConstraints::new(&mut bind_pool, &mut v_pool);
     cst.solve(&mut v_pool)?;
@@ -45,6 +46,7 @@ fn main() -> Result<(), String> {
 
     println!("m1: {:.4} ", (vb.pt.y - va.pt.y) / (vb.pt.x - va.pt.x));
     println!("m2: {:.4} ", (vd.pt.y - vc.pt.y) / (vd.pt.x - vc.pt.x));
+    println!("dist(va,vd): {:.4} ", va.dist_sq(&vd));
 
     Ok(())
 }
