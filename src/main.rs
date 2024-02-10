@@ -21,12 +21,14 @@ fn main() -> Result<(), String> {
     println!("m1: {:.4} ", (vb.pt.y - va.pt.y) / (vb.pt.x - va.pt.x));
     println!("m2: {:.4} ", (vd.pt.y - vc.pt.y) / (vd.pt.x - vc.pt.x));
 
-    _ = bind_pool.add_bind_parallel((&va, &vb), (&vc, &vd));
-    _ = bind_pool.add_bind_vertical((&vc, &vd));
-    _ = bind_pool.add_bind_fixed(&va);
-    _ = bind_pool.add_bind_fixed(&vc);
-    _ = bind_pool.add_bind_fixed_y(&vb);
-    _ = bind_pool.add_bind_fixed_y(&vd);
+    // 8 DOF and 8 Eq => Determined system
+    // Undertermined system sometimes work (converge) sometimes no
+    _ = bind_pool.add_bind_parallel((&va, &vb), (&vc, &vd)); // 1 eq
+    _ = bind_pool.add_bind_vertical((&vc, &vd)); // 1 eq
+    _ = bind_pool.add_bind_fixed(&va); // 2 eq
+    _ = bind_pool.add_bind_fixed(&vc); // 2 eq
+    _ = bind_pool.add_bind_fixed_y(&vb); // 1 eq
+    _ = bind_pool.add_bind_fixed_y(&vd); // 1 eq
 
     let mut cst = Eq2DConstraints::new(&mut bind_pool, &mut v_pool);
     cst.solve(&mut v_pool)?;
